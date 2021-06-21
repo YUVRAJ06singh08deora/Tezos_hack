@@ -1,5 +1,5 @@
 # Tezos_hack
-ABSTRACT
+## ABSTRACT
 • This project aims at reducing black marketing for covid vaccines by using blockchain technology. So basically, we keep track that for the total vaccine produced to date, surplus stock available with the factory/company and stock available at the vaccination centre.
 • In addition, a patient can also get information on the number of slots available for that day for a particular vaccine and information will be visible to all.
 ## INTRODUCTION
@@ -17,13 +17,16 @@ The user places an order for a particular vaccine from the factory, factory afte
 the ordered stock is greater than the ordered amount factory calls for transport. Transportation company looks
 through the available refrigerator trucks, if the number of refrigerator trucks >=1, the transportation is executed. The
 vaccine is then received by the vaccination centre and the respective stocks are updated
+
 • Slot Information
 The user which is now a patient can check vaccine slot availability with the vaccination centre for a particular vaccine.
 The vaccination centre after going through available slots, replies with a number of stocks available for the respective
 vaccine.
+
 • Updating Stock
 The user can also update the available stock with the factory for a particular vaccine by calling the entry_point-
 "update_stock" and thus will be updated for the same.
+
 ### PROBLEMS OUR PROJECT SOLVED
 • It keeps track of the vaccine order from where it is stored, in how much quantity, where it went, and the
 quantity at where it went.
