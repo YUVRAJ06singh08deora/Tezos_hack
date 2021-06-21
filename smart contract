@@ -1,0 +1,203 @@
+import smartpy as sp
+
+class vax_centre(sp.Contract):
+    def __init__(self, user_account):
+        
+        self.init(
+            user_account = user_account,
+            stock = {
+                "Covaxin": sp.nat(0),
+                "Covishield": sp.nat(0),
+                "Sputnik-V": sp.nat(0)     
+            },
+            available_slots = [
+                sp.record(vax_type = "Covaxin", quantity = 100),
+                sp.record(vax_type = "Covishield", quantity = 100),
+                sp.record(vax_type = "Sputnik-V", quantity = 100)
+            ]
+        )
+        
+    @sp.entry_point
+    def receive(self, vax):
+        
+        self.data.stock[vax.vax_type] += vax.quantity
+        
+    @sp.sub_entry_point
+    def checking(self, slot):
+        
+        slot_to_check = sp.local("slot_to_check", sp.record(vax_type = "", quantity = sp.nat(0)))
+        
+        sp.for s in self.data.available_slots:
+            sp.if s.vax_type == slot:
+            
+                slot_to_check.value.vax_type = s.vax_type
+                slot_to_check.value.quantity = s.quantity
+            
+        sp.result(slot_to_check.value)
+                
+    @sp.entry_point
+    def check_slot(self, slot):
+        availability = self.checking(slot.vax_type)
+        sp.transfer(availability, sp.mutez(0), slot.patient_contract)
+        
+class Factory(sp.Contract):
+    def __init__(self, tran_address, user_account):
+        
+        self.init(
+            user_account = user_account,
+            tran_address = tran_address,
+            total_produced = {
+                "Covaxin": sp.nat(100),
+                "Covishield": sp.nat(100),
+                "Sputnik-V": sp.nat(100)     
+            },
+            stock = [
+                sp.record(vax_type = "Covaxin", quantity = 100),
+                sp.record(vax_type = "Covishield", quantity = 100),
+                sp.record(vax_type = "Sputnik-V", quantity = 100)
+            ]
+        )
+        
+    @sp.entry_point
+    def update_stock(self, new_vax):
+        
+        sp.for vax in self.data.stock:
+            sp.if vax.vax_type == new_vax.vax_type:
+                vax.quantity += new_vax.quantity
+                self.data.total_produced[new_vax.vax_type] += new_vax.quantity
+    
+    @sp.entry_point
+    def send(self, vax):
+        
+        data_type = sp.TRecord(
+            vax_type = sp.TString,
+            quantity = sp.TNat
+        )
+        
+        send_contract = sp.contract(data_type, self.data.tran_address, "transport").open_some()
+        
+        data_to_be_sent = sp.record(
+            vax_type = self.check_stock(vax).vax_type,
+            quantity = self.check_stock(vax).quantity
+        )
+        sp.transfer(data_to_be_sent, sp.mutez(0), send_contract)
+        
+    @sp.sub_entry_point
+    def check_stock(self, vax):
+        
+        vax_to_check = sp.local("vax_to_check", sp.record(vax_type = "", quantity = sp.nat(0)))
+        
+        sp.for v in self.data.stock:
+            
+            sp.if v.vax_type == vax.vax_type:
+                
+                sp.if v.quantity >= vax.quantity:    
+                    
+                    vax_to_check.value.vax_type = v.vax_type
+                    vax_to_check.value.quantity = v.quantity
+                    v.quantity -= vax.quantity
+
+                sp.else:
+                    sp.failwith("Out of Stock")
+                
+        sp.result(vax_to_check.value)
+        
+        
+class Tran(sp.Contract):
+    def __init__(self, centre_address, user_account):
+        
+        self.init(
+            user_account = user_account,
+            centre_address = centre_address,
+            available_trucks = {
+                "refrigerated": 10,
+                "Non-ref": 5
+            }
+        )
+    
+    @sp.entry_point
+    def transport(self, vax):
+        
+        data_type = sp.TRecord(
+            vax_type = sp.TString,
+            quantity = sp.TNat
+        )
+        
+        tran_contract = sp.contract(data_type, self.data.centre_address, "receive").open_some()
+        
+        data_to_be_sent = sp.record(
+            vax_type = self.check_truck(vax).vax_type,
+            quantity = self.check_truck(vax).quantity
+        )
+        sp.transfer(data_to_be_sent, sp.mutez(0), tran_contract)
+        
+    @sp.sub_entry_point
+    def check_truck(self, vax):
+        
+        truck_to_check = sp.local("truck_to_check", sp.record(vax_type = "", quantity = sp.nat(0)))
+        
+        sp.if self.data.available_trucks["refrigerated"] >= 1:
+                
+            truck_to_check.value.vax_type = vax.vax_type
+            truck_to_check.value.quantity = vax.quantity
+            self.data.available_trucks["refrigerated"] -= 1
+                
+        sp.else:
+            sp.failwith("Out of Truck!!")
+                
+        sp.result(truck_to_check.value)
+        
+class Patient(sp.Contract):
+    def __init__(self, centre_address, user_account):
+    
+        self.init(
+            user_account = user_account,
+            centre_address = centre_address,
+            type_of_vaccine = "",
+            slot_status = sp.record(vax_type = "", quantity = sp.nat(0))
+        )
+        
+    @sp.entry_point
+    def check_vax(self, vax_type):
+        
+        data_type = sp.TRecord(
+            vax_type = sp.TString,
+            patient_contract = sp.TContract(sp.TRecord(vax_type = sp.TString, quantity = sp.TNat))
+        )
+        
+        centre_contract = sp.contract(data_type, self.data.centre_address, "check_slot")
+        
+        self_contract = sp.contract(sp.TRecord(vax_type = sp.TString, quantity = sp.TNat), sp.to_address(sp.self), "availability").open_some()
+        
+        data_to_be_sent = sp.record(
+            vax_type = vax_type,
+            patient_contract = self_contract
+        )
+        
+        sp.transfer(data_to_be_sent, sp.mutez(0), centre_contract)
+        
+    @sp.entry_point
+    def availability(self, slot):
+        self.data.slot_status.vax_type = slot.vax_type
+        self.data.slot_status.quantity = slot.quantity
+        
+@sp.add_test(name = "vax_slot_transfer")
+def test():
+    scenario = sp.test_scenario()
+    
+    user = sp.test_account("Govt. of India")
+    
+    centre = vax_centre(user_account = user.address)
+    scenario += centre
+    
+    transport = Tran(centre_address = centre.address, user_account = user.address)
+    scenario += transport
+    
+    factory = Factory(tran_address = transport.address, user_account = user.address)
+    scenario += factory
+   
+    patient = Patient(centre_address = centre.address, user_account = user.address)
+    scenario += patient
+    
+    scenario += factory.send(sp.record(vax_type = "Covaxin", quantity = 110))
+    scenario.verify(centre.data.stock("Covaxin") == 110)
