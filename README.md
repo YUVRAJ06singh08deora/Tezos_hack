@@ -1,6 +1,7 @@
 # Tezos_hack
 ## ABSTRACT
 • This project aims at reducing black marketing for covid vaccines by using blockchain technology. So basically, we keep track that for the total vaccine produced to date, surplus stock available with the factory/company and stock available at the vaccination centre.
+
 • In addition, a patient can also get information on the number of slots available for that day for a particular vaccine and information will be visible to all.
 ## INTRODUCTION
 This project greatly decreases any chances of misuse of the vaccine. As Our country is facing a shortage of vaccine due to some unfaithful people who are responsible for lots of innocent deaths So to bring these malpractices to an end becomes our priority. We tried to help our nation by building a website that helps to track all the information of covid vaccine through blockchain technology.
@@ -33,10 +34,13 @@ The user can also update the available stock with the factory for a particular v
 ### PROBLEMS OUR PROJECT SOLVED
 • It keeps track of the vaccine order from where it is stored, in how much quantity, where it went, and the
 quantity at where it went.
+
 • Due absence of any intermediary party and the stock’s track based on blockchain and smart contracts- hacking
 or corruption or black marketing is not possible
+
 • User can also directly check from the vaccination centres for the slot availability to avoid any misdirection
 regarding this information
+
 • Blockchain Technology - a secured and decentralized technology
 ### CONCLUSION
 The proposed solution is going to help our nation overcome our vaccine shortage problem
