@@ -37,7 +37,10 @@ The proposed solution is going to help our nation overcome our vaccine shortage 
 by keeping all the information decentralized and available to all. #VaxForAll
 ### THE TEAM
 • Garv Mittal – He came up with the idea, helped in smart contract algorithm, and edited the readme file
+
 • Anshh Seksaria – He coded the complete smart contract and edited the readme file
+
 • Yuvraj Singh – He created the front-end interactive website
+
 • Aaditry Choudhury – She created the readme file
 
