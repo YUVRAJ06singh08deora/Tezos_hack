@@ -13,17 +13,20 @@ This project greatly decreases any chances of misuse of the vaccine. As Our coun
 • Web Development
 ### WORKING
 • ### Ordering Vaccine
+
 The user places an order for a particular vaccine from the factory, factory after looking through the available stock, if
 the ordered stock is greater than the ordered amount factory calls for transport. Transportation company looks
 through the available refrigerator trucks, if the number of refrigerator trucks >=1, the transportation is executed. The
 vaccine is then received by the vaccination centre and the respective stocks are updated
 
 • ### Slot Information
+
 The user which is now a patient can check vaccine slot availability with the vaccination centre for a particular vaccine.
 The vaccination centre after going through available slots, replies with a number of stocks available for the respective
 vaccine.
 
 • ### Updating Stock
+
 The user can also update the available stock with the factory for a particular vaccine by calling the entry_point-
 "update_stock" and thus will be updated for the same.
 
